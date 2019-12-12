@@ -44,3 +44,20 @@ Use **JSON Web Tokens** to keep users authenticated across requests.
   - the `/users` route should read the token from local storage and make a `GET` request to the `/api/users` route on the API attaching the token as the value of the `Authorization` header.
   - provide a button to `sign out` that will remove the token from local storage.
 - add any extra functionality to make the application more user friendly like showing a message and redirecting to `/signin` if an unauthenticated user tries to access the list of users in the `/users` route.
+
+yarn init --yes
+fix package json
+add deps
+make index.js
+make server.js
+knex init
+fix knexfile
+knex migrate:make first
+write migration
+knex migrate:latest
+knex seed:make 00-cleanup
+etc etc
+knex seed:run
+make dbconfig
+make helpers
+make endpoints
