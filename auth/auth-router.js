@@ -20,6 +20,34 @@ router.post('/register', (req, res) => {
         });
 })
 
+router.post('/login', (req, res) => {
+    const { username, password } = req.body;
+  
+    Users.findBy({ username })
+      .first()
+      .then(user => {
+        if (user && bcrypt.compareSync(password, user.password)) {
+          const token = generateToken(user);
+          res.status(200).json({ username: user.username, token: token });
+        } else {
+          res.status(401).json({ message: 'Invalid Credentials' });
+        }
+      })
+      .catch(error => {
+        res.status(500).json(error);
+      });
+  });
+
+  router.get('/users', authorizedToken, (req, res) => {
+    Users.find()
+        .then((users) => {
+            res.status(200).json(users)
+        })
+        .catch((err) => {
+            res.status(500).json(err);
+        })
+  })
+
 function generateToken(user) {
     const payload = {
       userid: user.id,
@@ -32,6 +60,25 @@ function generateToken(user) {
     const token = jwt.sign(payload, secrets.jwtSecret, options);
 
     return token;
+}
+
+function authorizedToken(req, res, next) {
+    const token = req.headers.authorization.split(' ')[1];
+    
+    if (req.decodedJwt) { // will check for a token that is already authorized.
+      next();
+    } else if (token) {
+      jwt.verify(token, secrets.jwtSecret, (err, decodedJwt) => {
+        if (err) {
+          res.status(401).json({ message: "Failed to verify authorization" });
+        } else {
+          req.decodedJwt = decodedJwt;
+          next();
+        }
+      });
+    } else {
+      res.status(401).json({ message: "Failed to verify authorization" });
+    }
 }
 
 module.exports = router;
